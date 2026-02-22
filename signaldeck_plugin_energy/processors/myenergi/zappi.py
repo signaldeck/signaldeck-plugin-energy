@@ -8,7 +8,7 @@ from .zappidisplaydata import ZappiDisplayData
 
                         
 
-class zappi(PersistData,DisplayProcessor):
+class Zappi(PersistData,DisplayProcessor):
 
     def __init__(self,name,config,vP,collect_data):
         super().__init__(name,config,vP,collect_data)
@@ -189,7 +189,7 @@ class zappi(PersistData,DisplayProcessor):
 
     def getDisplayData(self, value, actionHash, **kwargs) -> DisplayData:
         self.refresh()
-        return ZappiDisplayData(actionHash).withValues(self)
+        return ZappiDisplayData(self.ctx, actionHash).withValues(self)
 
 
     def getDateParams(self):

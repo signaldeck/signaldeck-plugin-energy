@@ -1,22 +1,21 @@
 import asyncio
 import goodwe
-import os, logging, datetime,json,time
+import logging, datetime,json
 from signaldeck_sdk import Processor
-from flask import render_template
 from pathlib import Path
 from signaldeck_sdk import PersistData
 
 i18n= {
-    "date": "Zeit",
-    "ppv1": "Leistung String 1 (W)",
-    "ppv2": "Leistung String 2 (W)",
-    "ipv1": "Strom String 1 (A)",
-    "ipv2": "Strom String 2 (A)",
-    "vpv1": "Spannnug String 1 (V)",
-    "vpv2": "Spannnug String 2 (V)",
-    "ppv": "Leistung Gesamt (W)",
-    "e_day": "Tagesproduktion (kWh)",
-    "e_total": "Gesamtproduktion"
+    "date": "signaldeck_plugin_energy.GoodweInverter.label.date",
+    "ppv1": "signaldeck_plugin_energy.GoodweInverter.label.ppv1",
+    "ppv2": "signaldeck_plugin_energy.GoodweInverter.label.ppv2",
+    "ipv1": "signaldeck_plugin_energy.GoodweInverter.label.ipv1",
+    "ipv2": "signaldeck_plugin_energy.GoodweInverter.label.ipv2",
+    "vpv1": "signaldeck_plugin_energy.GoodweInverter.label.vpv1",
+    "vpv2": "signaldeck_plugin_energy.GoodweInverter.label.vpv2",
+    "ppv": "signaldeck_plugin_energy.GoodweInverter.label.ppv",
+    "e_day": "signaldeck_plugin_energy.GoodweInverter.label.e_day",
+    "e_total": "signaldeck_plugin_energy.GoodweInverter.label.e_total"
 }
 
 fields=["date","ppv","vpv1","ipv1","ppv1","vpv2","ipv2","ppv2","e_day","e_total"]
@@ -39,7 +38,7 @@ async def getData(ip_address,keys):
     except:
         return {"error": "Not available"}
 
-class inverter(PersistData,Processor):
+class GoodweInverter(PersistData,Processor):
 
     def __init__(self,name,config,vP,collect_data):
         super().__init__(name,config,vP,collect_data)
@@ -132,7 +131,7 @@ class inverter(PersistData,Processor):
     def renderResult(self,res):
         data_to_display = dict(res)
         data_to_display["date"] = res["date"].strftime("%d.%m.%Y %H:%M:%S")
-        return render_template("energy/inverter_state.html",values=data_to_display,i18n=i18n)
+        return self.ctx.render("energy/inverter_state.html",values=data_to_display,i18n=i18n)
 
     def getCachedStateFromFile(self):
         if self.state_cache is None:
@@ -148,6 +147,8 @@ class inverter(PersistData,Processor):
                 self.logger.warn("Unable to parse date")
                 return res
     
+    def getI18n(self):
+        return {k: self.ctx.t(v) for k,v in i18n.items()}
 
     def getState(self,value,actionHash):
         data=self.currVal
@@ -155,5 +156,5 @@ class inverter(PersistData,Processor):
             return ""
         data= {k: data[k] for k in value[0].split(",")+["date"]}
         data["date"] = data["date"].strftime("%d.%m.%Y %H:%M:%S")
-        return render_template("energy/inverter_state.html",values=data,i18n=i18n)
+        return self.ctx.render("energy/inverter_state.html",values=data,i18n=self.getI18n())
 

@@ -3,12 +3,32 @@ from datetime import datetime, timedelta
 from .display_data import PvDisplayData
 import logging
 from dateutil.relativedelta import relativedelta
+from signaldeck_sdk import Placeholder
 
-attr=["pv_day","power_in_today_start","power_in","power_out_today_start","power_out","pv_date","power_date","power_date_alt","pv_curr","power_curr","power_curr_alt","battery_soc","battery_power","battery_temp"]
+attr_base=["power_in_today_start","power_in","power_out_today_start","power_out","power_date","power_curr"]
+attr_pv = ["pv_day","pv_date","pv_curr"]
+attr_power_alt = ["power_date_alt","power_curr_alt"]
+attr_battery = ["battery_soc","battery_power","battery_temp"]
+
 class mock_pv:
     def __init__(self,inst):
-        for a in attr:
+        self.has_pv_data = False
+        self.has_battery_data = False
+        self.has_alt_power_data = False
+        for a in attr_base:
             setattr(self,a,getattr(inst,a))
+        if hasattr(inst,"pv_date"):
+            for a in attr_pv:
+                setattr(self,a,getattr(inst,a))
+            self.has_pv_data = True
+        if hasattr(inst,"power_date_alt"):
+            self.has_alt_power_data = True
+            for a in attr_power_alt:
+                setattr(self,a,getattr(inst,a))
+        if hasattr(inst,"battery_power"):
+            self.has_battery_data = True
+            for a in attr_battery:
+                setattr(self,a,getattr(inst,a))
 
 def getDateForOffsetMonth(offset,first=False,last=False):
     today = datetime.today() + relativedelta(months=-offset)
@@ -25,10 +45,31 @@ def getDateForOffsetYear(offset,first=False,last=False):
     if last:
         return today.replace(day=31,month=12)
 
-class pv(DisplayProcessor):
+class PvOverview(DisplayProcessor):
     def __init__(self,name,config,vP,collect_data):
         super().__init__(name,config,vP,collect_data)
         self.logger = logging.getLogger(__name__)
+
+    @classmethod
+    def config_placeholders(cls):
+        return [
+        Placeholder("pv", "Input Feld: pv", "str", default= "pv_curr"),
+        Placeholder("pv_day", "Input Feld: pv_day", "str", default= "pv_day"),
+        Placeholder("pv_date", "Input Feld: pv_date", "str", default= "pv_date"),
+        Placeholder("power_in", "Input Feld: power_in", "str", default= "power_in"),
+        Placeholder("power_out", "Input Feld: power_out", "str", default= "power_out"),
+        Placeholder("power_curr", "Input Feld: power_curr", "str", default= "power_curr"),
+        Placeholder("power_date", "Input Feld: power_date", "str", default= "power_date"),
+        Placeholder("power_curr_alt", "Input Feld: power_curr_alt", "str", default= "power_curr_alt"),
+        Placeholder("power_date_alt", "Input Feld: power_date_alt", "str", default= "power_date_alt"),
+        Placeholder("battery_soc", "Input Feld: battery_soc", "str", default= "battery_soc"),
+        Placeholder("battery_temp", "Input Feld: battery_temp", "str", default= "battery_temp"),
+        Placeholder("battery_power", "Input Feld: battery_power", "str", default= "battery_power"),
+        Placeholder("hist_power_in", "Input Feld: hist_power_in", "str", default= "hist_power_in"),
+        Placeholder("hist_power_out", "Input Feld: hist_power_out", "str", default= "hist_power_out"),
+        Placeholder("hist_pv_total", "Input Feld: hist_pv_total", "str", default= "hist_pv_total")
+        ]
+
 
     def refresh(self):
         old_pv_day=None
@@ -46,41 +87,52 @@ class pv(DisplayProcessor):
     def getDisplayDataInst(self,actionHash,mockInstance=None,**kwargs):
         if mockInstance is None:
             mockInstance = mock_pv(self)
-        return PvDisplayData(actionHash,params=kwargs).withExact(kwargs["exact"]).withOffset(kwargs["offset"]) \
+        res= PvDisplayData(self.ctx, actionHash).withData(kwargs) \
             .withCurrPower(mockInstance.power_curr) \
-            .withCurrPowerAlt(mockInstance.power_curr_alt) \
-            .withCurrPV(mockInstance.pv_curr) \
             .withPowerDate(mockInstance.power_date) \
-            .withPowerDateAlt(mockInstance.power_date_alt) \
-            .withPvDate(mockInstance.pv_date) \
-            .withPvGenerated(mockInstance.pv_day) \
             .withPowerTotalIn(mockInstance.power_in, mockInstance.power_in_today_start) \
-            .withBatterySOC(mockInstance.battery_soc) \
+            .withPowerTotalOut(mockInstance.power_out, mockInstance.power_out_today_start) 
+        if hasattr(mockInstance,"pv_curr"):
+            res = res \
+                .withCurrPV(mockInstance.pv_curr) \
+                .withPvDate(mockInstance.pv_date) \
+                .withPvGenerated(mockInstance.pv_day) 
+        if hasattr(mockInstance,"power_date_alt"):
+            res = res \
+                .withPowerDateAlt(mockInstance.power_date_alt) \
+                .withCurrPowerAlt(mockInstance.power_curr_alt) 
+        if hasattr(mockInstance,"battery_power"):
+            res=res.withBatterySOC(mockInstance.battery_soc) \
             .withBatteryPower(mockInstance.battery_power)\
             .withBatteryTemp(mockInstance.battery_temp)\
-            .withPowerTotalOut(mockInstance.power_out, mockInstance.power_out_today_start).compile()
+
+        return res.compile()
 
     def getMockedInstance(self,offset=0,exact=False,day=True,month=False,year=False):
         res= mock_pv(self)
         offset=int(offset)
         if offset > 0:
-            res.pv_date = res.pv_date + timedelta(days=-offset)
-            res.power_date = res.pv_date
+            if res.has_pv_data:
+                res.pv_date = res.pv_date + timedelta(days=-offset)
+            res.power_date = res.power_date + timedelta(days=-offset)
             if exact:
-                res.pv_day = float(self.hist_pv_total(days=0))-float(self.hist_pv_total(days=offset))
+                if res.has_pv_data:
+                    res.pv_day = float(self.hist_pv_total(days=0))-float(self.hist_pv_total(days=offset))
                 res.power_in_today_start = self.hist_power_in(days=offset)
                 res.power_in = self.hist_power_in(days=0)
                 res.power_out_today_start = self.hist_power_out(days=offset)
                 res.power_out = self.hist_power_out(days=0)            
             else:
                 if day:
-                    res.pv_day = float(self.hist_pv_total(days=offset,last=True))-float(self.hist_pv_total(days=offset,first=True))
+                    if res.has_pv_data:
+                        res.pv_day = float(self.hist_pv_total(days=offset,last=True))-float(self.hist_pv_total(days=offset,first=True))
                     res.power_in_today_start = self.hist_power_in(days=offset,first=True)
                     res.power_in = self.hist_power_in(days=offset,last=True)
                     res.power_out_today_start = self.hist_power_out(days=offset,first=True)
                     res.power_out = self.hist_power_out(days=offset,last=True)
                 if month:
-                    res.pv_day = float(self.hist_pv_total(days=0,date=getDateForOffsetMonth(offset,last=True),last=True))-float(self.hist_pv_total(days=0,date=getDateForOffsetMonth(offset,first=True),first=True))
+                    if res.has_pv_data:
+                        res.pv_day = float(self.hist_pv_total(days=0,date=getDateForOffsetMonth(offset,last=True),last=True))-float(self.hist_pv_total(days=0,date=getDateForOffsetMonth(offset,first=True),first=True))
                     res.power_in_today_start = self.hist_power_in(days=0,date=getDateForOffsetMonth(offset,first=True),first=True)
                     res.power_in = self.hist_power_in(days=0,date=getDateForOffsetMonth(offset,last=True),last=True)
                     res.power_out_today_start = self.hist_power_out(days=0,date=getDateForOffsetMonth(offset,first=True),first=True)
@@ -88,20 +140,23 @@ class pv(DisplayProcessor):
                 if year:
                     high_date = getDateForOffsetYear(offset,last=True)
                     low_date = getDateForOffsetYear(offset,first=True)
-                    res.pv_day = float(self.hist_pv_total(days=0,date=high_date,last=True))-float(self.hist_pv_total(days=0,date=low_date,first=True))
+                    if res.has_pv_data:
+                        res.pv_day = float(self.hist_pv_total(days=0,date=high_date,last=True))-float(self.hist_pv_total(days=0,date=low_date,first=True))
                     res.power_in_today_start = self.hist_power_in(days=0,date=low_date,first=True)
                     res.power_in = self.hist_power_in(days=0,date=high_date,last=True)
                     res.power_out_today_start = self.hist_power_out(days=0,date=low_date,first=True)
                     res.power_out = self.hist_power_out(days=0,date=high_date,last=True)
         else:
             if month:
-                res.pv_day = float(self.hist_pv_total(days=0,last=True))-float(self.hist_pv_total(days=0,date=getDateForOffsetMonth(offset,first=True),first=True))
+                if res.has_pv_data:
+                    res.pv_day = float(self.hist_pv_total(days=0,last=True))-float(self.hist_pv_total(days=0,date=getDateForOffsetMonth(offset,first=True),first=True))
                 res.power_in_today_start = self.hist_power_in(days=0,date=getDateForOffsetMonth(offset,first=True),first=True)
                 res.power_in = self.hist_power_in(days=offset,last=True)
                 res.power_out_today_start = self.hist_power_out(days=0,date=getDateForOffsetMonth(offset,first=True),first=True)
                 res.power_out = self.hist_power_out(days=offset,last=True)
             if year:
-                res.pv_day = float(self.hist_pv_total(days=0,last=True))-float(self.hist_pv_total(days=0,date=getDateForOffsetYear(offset,first=True),first=True))
+                if res.has_pv_data:
+                    res.pv_day = float(self.hist_pv_total(days=0,last=True))-float(self.hist_pv_total(days=0,date=getDateForOffsetYear(offset,first=True),first=True))
                 res.power_in_today_start = self.hist_power_in(days=0,date=getDateForOffsetYear(offset,first=True),first=True)
                 res.power_in = self.hist_power_in(days=offset,last=True)
                 res.power_out_today_start = self.hist_power_out(days=0,date=getDateForOffsetYear(offset,first=True),first=True)

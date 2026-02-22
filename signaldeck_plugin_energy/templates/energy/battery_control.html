@@ -1,18 +1,18 @@
-{% from "core/_utils.html" import renderButton %}
+{% from "ui/_utils.html" import renderButton %}
 
 
 <br/>
 
 <div class="state-container">
     <div class="state-row head">
-        <div class="state-label wide">Battery Management System</div>
+        <div class="state-label wide">{{ t("signaldeck_plugin_energy.MeterSimulator.title.bms") }}</div>
     </div>
     {% for buttonName in displayData.button_names_ordered() %}
 {{ renderButton(buttonName,displayData) }}
 {% endfor %}
 <br/>
     <div class="state-row">
-        <div class="state-label"> Battery unload gap (W) </div>
+        <div class="state-label"> {{ t("signaldeck_plugin_energy.MeterSimulator.label.battery_unload_gap_w") }} </div>
         <div class="state-value">{{ renderButton("unload_gap_m100",displayData) }}
         {{ renderButton("unload_gap_m10",displayData) }}
         {{ displayData.battery_unload_gap }}
@@ -20,7 +20,7 @@
         {{ renderButton("unload_gap_p100",displayData) }}</div>
     </div>
     <div class="state-row">
-        <div class="state-label"> Battery load gap (W) </div>
+        <div class="state-label"> {{ t("signaldeck_plugin_energy.MeterSimulator.label.battery_load_gap_w") }}</div>
         <div class="state-value">{{ renderButton("load_gap_m100",displayData) }}
         {{ renderButton("load_gap_m10",displayData) }}
         {{ displayData.battery_load_remain_power }}
@@ -28,23 +28,23 @@
         {{ renderButton("load_gap_p100",displayData) }}</div>
     </div>
     <div class="state-row">
-        <div class="state-label"> Hausstrom (W) </div>
+        <div class="state-label"> {{ t("signaldeck_plugin_energy.MeterSimulator.label.house_power_w") }}</div>
         <div class="state-value">{{ displayData.power_curr }} </div>
     </div>
     <div class="state-row">
-        <div class="state-label">PV Leistung (W)</div>
+        <div class="state-label"> {{ t("signaldeck_plugin_energy.MeterSimulator.label.pv_power_w") }}</div>
         <div class="state-value">{{ displayData.pv_curr}} </div>
     </div>
     <div class="state-row">
-        <div class="state-label">Batterieleistung (W)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.MeterSimulator.label.battery_power_w") }}</div>
         <div class="state-value">{{ displayData.battery_power}} </div>
     </div>
     <div class="state-row">
-        <div class="state-label">Freie Leistung (ohne Batterie)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.MeterSimulator.label.free_power_no_battery") }}</div>
         <div class="state-value">{{ displayData.free_power}} </div>
     </div>
     <div class="state-row">
-        <div class="state-label">Emulierte Leistung (W) | Offset</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.MeterSimulator.label.emulated_power_offset") }}</div>
         <div class="state-value">{{ displayData.power_curr_emu}}  | {{ displayData.power_curr - displayData.power_curr_emu }}</div>
     </div>
 

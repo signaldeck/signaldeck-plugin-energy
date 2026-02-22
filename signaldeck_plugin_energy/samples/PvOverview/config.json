@@ -1,0 +1,96 @@
+{
+  "values": [
+    {
+      "type": "field",
+      "name": "pv_curr",
+      "from": "$pv$"
+    },
+    {
+      "type": "field",
+      "name": "pv_day",
+      "from": "$pv_day$"
+    },
+    {
+      "type": "field",
+      "name": "pv_date",
+      "from": "$pv_date$"
+    },
+    {
+      "type": "field",
+      "name": "power_in",
+      "from": "$power_in$"
+    },
+    {
+      "type": "field",
+      "name": "power_out",
+      "from": "$power_out$"
+    },
+    {
+      "type": "field",
+      "name": "power_curr",
+      "from": "$power_curr$"
+    },
+    {
+      "type": "field",
+      "name": "power_date",
+      "from": "$power_date$"
+    },
+    {
+      "type": "field",
+      "name": "power_curr_alt",
+      "from": "$power_curr_alt$"
+    },
+    {
+      "type": "field",
+      "name": "power_date_alt",
+      "from": "$power_date_alt$"
+    },
+    {
+      "type": "field",
+      "name": "battery_soc",
+      "from": "$battery_soc$"
+    },
+    {
+      "type": "field",
+      "name": "battery_temp",
+      "from": "$battery_temp$"
+    },
+    {
+      "type": "field",
+      "name": "battery_power",
+      "from": "$battery_power$"
+    },
+    {
+      "type": "method",
+      "name": "power_in_today_start",
+      "from": "$hist_power_in$",
+      "params": {
+        "days": 0,
+        "first": true
+      }
+    },
+    {
+      "type": "method",
+      "name": "power_out_today_start",
+      "from": "$hist_power_out$",
+      "params": {
+        "days": 0,
+        "first": true
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "hist_pv_total",
+      "from": "$hist_pv_total$"
+    },
+    {
+      "name": "hist_power_in",
+      "from": "$hist_power_in$"
+    },
+    {
+      "name": "hist_power_out",
+      "from": "$hist_power_out$"
+    }
+  ]
+}

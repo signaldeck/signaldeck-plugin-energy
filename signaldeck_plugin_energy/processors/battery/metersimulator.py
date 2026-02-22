@@ -33,7 +33,7 @@ class UnsetOffset(Command):
         if cmdRes is not None:
             cmdRes.appendState(self,msg=f'Set battery meter simulator to auto mode')
 
-class metersimulator(DisplayProcessor):
+class MeterSimulator(DisplayProcessor):
 
 
     def __init__(self,name,config,vP,collect_data):
@@ -83,7 +83,7 @@ class metersimulator(DisplayProcessor):
 
     def getDisplayData(self, value, actionHash, **kwargs) -> DisplayData:
         self.refresh()
-        return BatteryControlDisplayData(actionHash).withValues(self)
+        return BatteryControlDisplayData(self.ctx, actionHash).withValues(self)
 
 
     def getDateParams(self):

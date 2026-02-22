@@ -1,6 +1,7 @@
-{% from "core/_utils.html" import renderButton %}
+{% from "ui/_utils.html" import renderButton, renderStateDiv %}
 
 <div class="state-container">
+{{ renderStateDiv(displayData) }}
 <div class="state-row">
 <div class="state-buttons">
 {% for buttonName in ["day","month","year"] %}
@@ -20,49 +21,65 @@
         <div class="state-label wide">{{ displayData.title }}</div>
     </div>
     <div class="state-row">
-        <div class="state-label">Strom Bezug (kWh)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.grid_import_kwh") }}</div>
         <div class="state-value">{{ displayData.power_diff_in|round(2, 'floor')}} </div>
     </div>
     <div class="state-row">
-        <div class="state-label">Strom Einspeisung (kWh)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.grid_export_kwh") }}</div>
         <div class="state-value">{{ displayData.power_diff_out|round(2, 'floor')}} </div>
     </div>
+    {% if displayData.has_pv_data %}
     <div class="state-row">
-        <div class="state-label">Ertrag (kWh)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.yield_kwh") }}</div>
         <div class="state-value">{{ displayData.pv_gen|round(2, 'floor')}} </div>
     </div>
     <div class="state-row">
-        <div class="state-label">Eigenverbrauch (kWh)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.self_consumption_kwh") }}</div>
         <div class="state-value">{{ displayData.pv_used|round(2,'floor')}} </div>
     </div>
+    {% endif %}
     <div class="state-row">
-        <div class="state-label">Gesamtverbrauch (kWh)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.total_consumption_kwh") }}</div>
         <div class="state-value">{{ displayData.total_power_usage|round(2, 'floor')}} </div>
     </div>
+    {% if displayData.has_battery_data %}
     <div class="state-row">
-        <div class="state-label">Batterieladung (%)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.battery_soc_percent") }}</div>
         <div class="state-value">{{ displayData.battery_soc}} </div>
     </div>
         <div class="state-row">
-        <div class="state-label">Batterietemperatur (°C)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.battery_temp_c") }}</div>
         <div class="state-value">{{ displayData.battery_temp|round(1, 'floor')}} </div>
     </div>
+    {% endif %}
+    {% if displayData.has_alt_power_data %}
     <div class="state-row">
-        <div class="state-label">Strom Shelly (W)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.shelly_power_w") }}</div>
         <div class="state-value">{{ displayData.curr_power_alt}} </div>
     </div>
+    {% endif %}
+    {% if displayData.has_pv_data %}
     <div class="state-row">
-        <div class="state-label">Autarkie (%)</div>
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.self_sufficiency_percent") }}</div>
         <div class="state-value">{{ displayData.autarkie|round(2, 'floor')}} </div>
     </div>
-    <div class="state-row-3 large center">
-        <div class="state-label">PV</div>
-        <div class="state-label">Batterie</div>
-        <div class="state-label">Gesamt</div>
+    {% endif %}
+    <div class="state-row-{{ displayData.numberOfResultVals() }} large center">
+        {% if displayData.has_pv_data %}
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.pv") }}</div>
+        {% endif %}
+        {% if displayData.has_battery_data %}
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.battery") }}</div>
+        {% endif %}
+        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.total") }}</div>
     </div>
-    <div class="state-row-3 large center">
+    <div class="state-row-{{ displayData.numberOfResultVals() }} large center">
+        {% if displayData.has_pv_data %}
         <div class="state-value">{{ displayData.curr_pv}}</div>
+        {% endif %}
+        {% if displayData.has_battery_data %}
         <div class="state-value">{{ displayData.battery_power}}</div>
+        {% endif %}
         <div class="state-value {{ 'red' if displayData.curr_power>0 else 'green' }}">{{ displayData.curr_power }}
         </div>
     </div>
