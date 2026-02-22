@@ -1,5 +1,5 @@
 import datetime,json
-from build.lib.signaldeck_sdk.context import ApplicationContext
+from signaldeck_sdk.context import ApplicationContext
 from signaldeck_sdk import DisplayData
 import calendar
 from dateutil.relativedelta import relativedelta
