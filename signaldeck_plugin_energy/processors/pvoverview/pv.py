@@ -76,12 +76,13 @@ class PvOverview(DisplayProcessor):
         if hasattr(self,"pv_day"):
             old_pv_day=self.pv_day
         super().refresh()
-        if self.pv_day is None:
+        if hasattr(self,"pv_date") and self.pv_day is None:
             self.pv_day = old_pv_day
-        if datetime.today().day != self.pv_date.day:
-            self.pv_date = self.power_date
-            self.pv_curr=0
-            self.pv_day=0
+        if hasattr(self,"pv_date"):
+            if datetime.today().day != self.pv_date.day:
+                self.pv_date = self.power_date
+                self.pv_curr=0
+                self.pv_day=0
         
             
     def getDisplayDataInst(self,actionHash,mockInstance=None,**kwargs):

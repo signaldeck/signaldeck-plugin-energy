@@ -131,7 +131,7 @@ class GoodweInverter(PersistData,Processor):
     def renderResult(self,res):
         data_to_display = dict(res)
         data_to_display["date"] = res["date"].strftime("%d.%m.%Y %H:%M:%S")
-        return self.ctx.render("energy/inverter_state.html",values=data_to_display,i18n=i18n)
+        return self.ctx.render("energy/inverter_state.html",values=data_to_display,i18n=self.getI18n())
 
     def getCachedStateFromFile(self):
         if self.state_cache is None:

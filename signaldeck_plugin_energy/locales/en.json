@@ -68,5 +68,6 @@
   "signaldeck_plugin_energy.pv.label.shelly_power_w": "Shelly power (W)",
   "signaldeck_plugin_energy.pv.label.total": "Total (W)",
   "signaldeck_plugin_energy.pv.label.total_consumption_kwh": "Total consumption (kWh)",
+  "signaldeck_plugin_energy.pv.label.total_only_power": "Current power (W)",
   "signaldeck_plugin_energy.pv.label.yield_kwh": "Yield (kWh)"
 }

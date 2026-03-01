@@ -148,14 +148,18 @@ class PvDisplayData(DisplayData):
             hours=self.offset * 24
             return f'{hours}h von {datetime.datetime.now()+datetime.timedelta(days=-self.offset)}'
         if self.offset == 0 and self.day:
-            return f'{self.pv_date.year}-{self.pv_date.month}-{self.pv_date.day} {self.pv_date.time().strftime("%H:%M:%S")}/{self.power_date.time().strftime("%H:%M:%S")} ({self.power_date_alt.time().strftime("%H:%M:%S")})'
+            if self.has_pv_data and self.has_alt_power_data:
+                return f'{self.pv_date.year}-{self.pv_date.month}-{self.pv_date.day} {self.pv_date.time().strftime("%H:%M:%S")}/{self.power_date.time().strftime("%H:%M:%S")} ({self.power_date_alt.time().strftime("%H:%M:%S")})'
+            if self.has_pv_data:
+                return f'{self.pv_date.year}-{self.pv_date.month}-{self.pv_date.day} {self.pv_date.time().strftime("%H:%M:%S")}'
+            return f'{self.power_date.year}-{self.power_date.month}-{self.power_date.day} {self.power_date.time().strftime("%H:%M:%S")}'
         else:
             if self.day:
-                return f'{self.pv_date.date()}'
+                return f'{self.power_date.date()}'
             if self.month:
                 return f'{getMonthName(self.offset)}'
             if self.year:
-                year= self.pv_date.date().year
+                year= self.power_date.date().year
                 year = year - self.offset
                 return f'{year}'
         

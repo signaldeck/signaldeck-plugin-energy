@@ -24,11 +24,11 @@
         <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.grid_import_kwh") }}</div>
         <div class="state-value">{{ displayData.power_diff_in|round(2, 'floor')}} </div>
     </div>
+    {% if displayData.has_pv_data %}
     <div class="state-row">
         <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.grid_export_kwh") }}</div>
         <div class="state-value">{{ displayData.power_diff_out|round(2, 'floor')}} </div>
     </div>
-    {% if displayData.has_pv_data %}
     <div class="state-row">
         <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.yield_kwh") }}</div>
         <div class="state-value">{{ displayData.pv_gen|round(2, 'floor')}} </div>
@@ -37,11 +37,11 @@
         <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.self_consumption_kwh") }}</div>
         <div class="state-value">{{ displayData.pv_used|round(2,'floor')}} </div>
     </div>
-    {% endif %}
     <div class="state-row">
         <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.total_consumption_kwh") }}</div>
         <div class="state-value">{{ displayData.total_power_usage|round(2, 'floor')}} </div>
     </div>
+    {% endif %}
     {% if displayData.has_battery_data %}
     <div class="state-row">
         <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.battery_soc_percent") }}</div>
@@ -71,7 +71,13 @@
         {% if displayData.has_battery_data %}
         <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.battery") }}</div>
         {% endif %}
-        <div class="state-label">{{ t("signaldeck_plugin_energy.pv.label.total") }}</div>
+        <div class="state-label">
+            {% if displayData.has_pv_data %}
+             {{ t("signaldeck_plugin_energy.pv.label.total") }}
+            {% else %}
+             {{ t("signaldeck_plugin_energy.pv.label.total_only_power") }}
+            {% endif %}
+        </div>
     </div>
     <div class="state-row-{{ displayData.numberOfResultVals() }} large center">
         {% if displayData.has_pv_data %}
