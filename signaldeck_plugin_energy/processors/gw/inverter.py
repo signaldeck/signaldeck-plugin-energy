@@ -40,8 +40,8 @@ async def getData(ip_address,keys):
 
 class GoodweInverter(PersistData,Processor):
 
-    def __init__(self,name,config,vP,collect_data):
-        super().__init__(name,config,vP,collect_data)
+    def __init__(self,name,config,ctx,vP,collect_data):
+        super().__init__(name,config,ctx,vP,collect_data)
         self.is_running = True 
         self.ip=config["ip"]
         self.interval_normal= 3 * 60

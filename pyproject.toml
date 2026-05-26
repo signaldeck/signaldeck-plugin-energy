@@ -26,6 +26,7 @@ include = ["signaldeck_plugin_energy*"]
 
 [tool.setuptools.package-data]
 signaldeck_plugin_energy = [
+  "static/**/*",
   "templates/**/*",
   "samples/**/*",
   "locales/**/*"

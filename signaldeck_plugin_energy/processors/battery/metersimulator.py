@@ -36,8 +36,8 @@ class UnsetOffset(Command):
 class MeterSimulator(DisplayProcessor):
 
 
-    def __init__(self,name,config,vP,collect_data):
-        super().__init__(name,config,vP,collect_data)
+    def __init__(self,name,config,ctx,vP,collect_data):
+        super().__init__(name,config,ctx,vP,collect_data)
         self.logger = logging.getLogger(__name__)
         self.big_pv_power = False
         self.fix_offset = None
